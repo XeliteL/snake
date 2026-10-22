@@ -3,16 +3,19 @@
 import pygame
 
 from controls import handle_keys
-from game_objects import Apple, GameObject, Snake
+from display import clock, screen
+from game import check_collisions, eat_apple, eat_poison
+from game_objects import Apple, GameObject, Poison, Snake, Stone
 from settings import (
     BOARD_BACKGROUND_COLOR, DOWN, GRID_HEIGHT, GRID_SIZE, GRID_WIDTH, LEFT,
-    RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, SPEED, UP, clock, screen
+    RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, UP
 )
 
 __all__ = [
     'Apple', 'BOARD_BACKGROUND_COLOR', 'DOWN', 'GRID_HEIGHT', 'GRID_SIZE',
     'GRID_WIDTH', 'GameObject', 'LEFT', 'RIGHT', 'SCREEN_HEIGHT',
-    'SCREEN_WIDTH', 'Snake', 'UP', 'clock', 'handle_keys', 'main', 'screen',
+    'Poison', 'SCREEN_WIDTH', 'Snake', 'Stone', 'UP', 'clock', 'handle_keys',
+    'main', 'screen',
 ]
 
 
@@ -20,20 +23,25 @@ def main():
     """Запускает игру и основной игровой цикл."""
     pygame.init()
 
-    apple = Apple()
     snake = Snake()
+    apple = Apple(occupied=snake.positions)
+    poison = Poison()
+    stone = Stone()
 
     while 1000 - 7:
-        clock.tick(SPEED)
+        clock.tick(snake.speed)
 
         handle_keys(snake)
         snake.update_direction()
         snake.move()
+
         if snake.get_head_position() == apple.position:
-            snake.length += 1
-            apple.randomize_position()
-        if snake.get_head_position() in snake.positions[1:]:
-            snake.reset()
+            eat_apple(snake, apple, poison, stone)
+        elif snake.get_head_position() in poison.positions:
+            eat_poison(snake, apple, poison, stone)
+
+        check_collisions(snake, apple, poison, stone)
+
         snake.draw()
         apple.draw()
         pygame.display.update()
