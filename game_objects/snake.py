@@ -5,7 +5,7 @@ import pygame
 from display import screen
 from game_objects.base import GameObject
 from settings import (
-    BOARD_BACKGROUND_COLOR, BORDER_COLOR, GRID_SIZE, RIGHT, SCREEN_HEIGHT,
+    BOARD_BACKGROUND_COLOR, GRID_SIZE, RIGHT, SCREEN_HEIGHT,
     SCREEN_WIDTH, SNAKE_COLOR, START_SPEED
 )
 
@@ -60,13 +60,9 @@ class Snake(GameObject):
     def draw(self):
         """Отрисовывает змейку и затирает след хвоста."""
         for position in self.positions[1:-1]:
-            rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
-            pygame.draw.rect(screen, self.body_color, rect)
-            pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+            self.draw_cell(position)
 
-        head_rect = pygame.Rect(self.positions[0], (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, head_rect)
-        pygame.draw.rect(screen, BORDER_COLOR, head_rect, 1)
+        self.draw_cell(self.positions[0])
 
         if self.last:
             last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
