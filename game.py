@@ -56,6 +56,7 @@ def reset_game(snake, apple, poison, stone):
 def eat_poison(snake, apple, poison, stone):
     """Укорачивает змейку; если длина стала нулевой — сбрасывает игру."""
     snake.delete_tail()
+    snake.speed -= FAST_SPEED_STEP
     if snake.length == 0:
         reset_game(snake, apple, poison, stone)
         return
