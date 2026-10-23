@@ -1,6 +1,16 @@
 """Игровая логика: поедание еды и столкновения."""
 
-from settings import GRID_SIZE, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import (
+    FAST_SPEED,
+    FAST_SPEED_STEP,
+    GRID_SIZE,
+    MAX_SPEED,
+    MAX_SPEED_STEP,
+    POISON_EVERY_APPLES,
+    SCREEN_HEIGHT,
+    SCREEN_WIDTH,
+    SLOW_SPEED_STEP,
+)
 
 
 def eat_apple(snake, apple, poison, stone):
@@ -9,20 +19,20 @@ def eat_apple(snake, apple, poison, stone):
     apple.randomize_position(
         snake.positions + stone.positions + poison.positions
     )
-    if snake.speed < 25:
-        if snake.speed < 15:
-            snake.speed += 0.5
+    if snake.speed < MAX_SPEED:
+        if snake.speed < FAST_SPEED:
+            snake.speed += SLOW_SPEED_STEP
         else:
-            snake.speed += 0.2
+            snake.speed += FAST_SPEED_STEP
 
-        if snake.length % 10 == 0:
+        if snake.length % POISON_EVERY_APPLES == 0:
             poison.randomize_position(
                 snake.positions + stone.positions
                 + [snake.last, apple.position]
             )
             poison.draw()
     else:
-        snake.speed += 0.1
+        snake.speed += MAX_SPEED_STEP
         head_x, head_y = snake.get_head_position()
         stone.randomize_position(
             snake.positions
