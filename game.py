@@ -6,6 +6,7 @@ from settings import (
     GRID_SIZE,
     MAX_SPEED,
     MAX_SPEED_STEP,
+    MAX_STONES,
     POISON_EVERY_APPLES,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
@@ -34,13 +35,14 @@ def eat_apple(snake, apple, poison, stone):
     else:
         snake.speed += MAX_SPEED_STEP
         head_x, head_y = snake.get_head_position()
-        stone.randomize_position(
-            snake.positions
-            + [snake.last, apple.position] + poison.positions
-            + [(x, head_y) for x in range(0, SCREEN_WIDTH, GRID_SIZE)]
-            + [(head_x, y) for y in range(0, SCREEN_HEIGHT, GRID_SIZE)]
-        )
-        stone.draw()
+        if len(stone.positions) < MAX_STONES:
+            stone.randomize_position(
+                snake.positions
+                + [snake.last, apple.position] + poison.positions
+                + [(x, head_y) for x in range(0, SCREEN_WIDTH, GRID_SIZE)]
+                + [(head_x, y) for y in range(0, SCREEN_HEIGHT, GRID_SIZE)]
+            )
+            stone.draw()
 
 
 def reset_game(snake, apple, poison, stone):
