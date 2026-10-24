@@ -59,6 +59,16 @@ def test_poison_starts_empty_and_resets():
     assert poison.positions == []
 
 
+def test_full_field_does_not_hang():
+    apple, poison, stone = Apple(), Poison(), Stone()
+    position = apple.position
+    assert apple.randomize_position(ALL_CELLS) == position
+    assert poison.randomize_position(ALL_CELLS) is None
+    assert poison.positions == []
+    stone.randomize_position(ALL_CELLS)
+    assert stone.positions == []
+
+
 def test_poison_and_stone_skip_occupied():
     free = (40, 60)
     occupied = [cell for cell in ALL_CELLS if cell != free]

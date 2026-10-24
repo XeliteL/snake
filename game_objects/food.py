@@ -13,8 +13,13 @@ class Food(GameObject):
         super().__init__(body_color=body_color)
 
     def randomize_position(self, occupied=()):
-        """Перемещает еду в случайную клетку и возвращает её."""
-        self.position = self.random_cell(occupied)
+        """Перемещает еду в случайную клетку и возвращает её.
+
+        Если свободных клеток нет, еда остаётся на месте.
+        """
+        new_position = self.random_cell(occupied)
+        if new_position is not None:
+            self.position = new_position
         return self.position
 
     def draw(self):

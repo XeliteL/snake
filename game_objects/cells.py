@@ -12,14 +12,19 @@ class CellGroup(GameObject):
         self.positions = list(positions)
 
     def randomize_position(self, occupied=()):
-        """Добавляет клетку в случайное свободное место и возвращает её."""
+        """Добавляет клетку в случайное свободное место и возвращает её.
+
+        Если свободных клеток нет, ничего не добавляет и возвращает None.
+        """
         new_position = self.random_cell(occupied)
-        self.positions.append(new_position)
+        if new_position is not None:
+            self.positions.append(new_position)
         return new_position
 
     def draw(self):
-        """Отрисовывает последнюю добавленную клетку."""
-        self.draw_cell(self.positions[-1])
+        """Отрисовывает последнюю добавленную клетку, если она есть."""
+        if self.positions:
+            self.draw_cell(self.positions[-1])
 
     def reset(self):
         """Убирает все клетки с поля."""
