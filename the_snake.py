@@ -4,7 +4,8 @@ import pygame
 
 from controls import handle_keys
 from display import (
-    clock, draw_game_over, draw_pause, draw_victory, screen
+    clock, draw_game_over, draw_pause, draw_victory, screen, init_display,
+    copy_screen
 )
 from game import check_collisions, eat_apple, eat_poison, reset_game
 from game_objects import Apple, GameObject, Poison, Snake, Stone
@@ -45,7 +46,7 @@ def play_frame(snake, apple, poison, stone):
     apple.draw()
     poison.draw()
     stone.draw()
-    pygame.display.update()
+    copy_screen()
 
 
 def main():
@@ -56,6 +57,7 @@ def main():
     Когда игрок снимает флаг game_over, игра начинается заново.
     """
     pygame.init()
+    init_display()
 
     snake = Snake()
     apple = Apple(occupied=snake.positions)
@@ -72,7 +74,7 @@ def main():
             if not pause_shown:
                 pause_shown = True
                 draw_pause()
-                pygame.display.update()
+                copy_screen()
             continue
         pause_shown = False
 
@@ -83,7 +85,7 @@ def main():
                     draw_victory()
                 else:
                     draw_game_over()
-                pygame.display.update()
+                copy_screen()
             continue
         if game_over_shown:
             game_over_shown = False

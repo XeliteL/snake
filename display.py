@@ -7,9 +7,22 @@ from settings import (
     SHADOW_COLOR, SHADOW_OFFSET, TEXT_COLOR, VICTORY_COLOR
 )
 
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
-pygame.display.set_caption("Змейка")
+screen = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
+window = None
 clock = pygame.time.Clock()
+
+
+def init_display():
+    """Открывает окно игры."""
+    global window
+    window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
+    pygame.display.set_caption("Змейка")
+
+
+def copy_screen():
+    """Копирует нарисованный кадр в окно и показывает его."""
+    window.blit(screen, (0, 0))
+    pygame.display.update()
 
 
 def draw_overlay():
