@@ -14,7 +14,7 @@ class Snake(GameObject):
     """Змейка, управляемая игроком.
 
     Хранит позиции сегментов тела, длину, направление движения, скорость,
-    а также состояние паузы и проигрыша.
+    а также состояние паузы, проигрыша и победы.
     """
 
     def __init__(
@@ -29,6 +29,7 @@ class Snake(GameObject):
             paused=False,
             game_over=False,
             game_over_time=0,
+            won=False,
     ):
         """Создаёт змейку в центре поля."""
         super().__init__(body_color=body_color)
@@ -41,6 +42,7 @@ class Snake(GameObject):
         self.paused = paused
         self.game_over = game_over
         self.game_over_time = game_over_time
+        self.won = won
 
     def update_direction(self):
         """Применяет направление, выбранное игроком."""
@@ -87,6 +89,11 @@ class Snake(GameObject):
         self.game_over = True
         self.game_over_time = pygame.time.get_ticks()
 
+    def win(self):
+        """Завершает партию победой."""
+        self.won = True
+        self.die()
+
     def reset(self):
         """Возвращает змейку в начальное состояние и очищает экран."""
         self.length = 1
@@ -98,4 +105,5 @@ class Snake(GameObject):
         self.paused = False
         self.game_over = False
         self.game_over_time = 0
+        self.won = False
         screen.fill(BOARD_BACKGROUND_COLOR)

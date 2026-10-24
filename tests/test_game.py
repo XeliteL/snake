@@ -6,7 +6,8 @@ import pytest
 from game import check_collisions, eat_apple, eat_poison, reset_game
 from game_objects import Apple, Poison, Snake, Stone
 from settings import (
-    GRID_SIZE, LEFT, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, START_SPEED, UP
+    GRID_SIZE, LEFT, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, START_SPEED, UP,
+    WIN_LENGTH
 )
 
 ALL_CELLS = [
@@ -133,7 +134,8 @@ def test_eat_apple_grows_and_speeds_up(objects):
 
 def test_speed_never_drops_on_apple(objects):
     snake, apple, poison, stone = objects
-    for _ in range(REPEATS):
+    # До победы: на WIN_LENGTH змейка выигрывает и больше не ускоряется.
+    for _ in range(WIN_LENGTH - 2):
         speed = snake.speed
         eat_apple(snake, apple, poison, stone)
         assert snake.speed > speed
@@ -166,6 +168,7 @@ def test_stone_never_in_head_row_or_column(objects):
         x, y = stone.positions[-1]
         assert x != head_x and y != head_y
         stone.reset()
+        snake.length = 1
 
 
 # --- eat_poison ---

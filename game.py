@@ -11,12 +11,19 @@ from settings import (
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
     SLOW_SPEED_STEP,
+    WIN_LENGTH,
 )
 
 
 def eat_apple(snake, apple, poison, stone):
-    """Удлиняет змейку, ускоряет её и добавляет отраву или камни."""
+    """Удлиняет змейку, ускоряет её и добавляет отраву или камни.
+
+    Если змейка доросла до WIN_LENGTH, партия выиграна.
+    """
     snake.length += 1
+    if snake.length >= WIN_LENGTH:
+        snake.win()
+        return
     apple.randomize_position(
         snake.positions + stone.positions + poison.positions
     )

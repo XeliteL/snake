@@ -1,10 +1,10 @@
-"""Окно игры, таймер и надписи паузы и проигрыша."""
+"""Окно игры, таймер и надписи паузы, проигрыша и победы."""
 import pygame
 
 from settings import (
     BOARD_BACKGROUND_COLOR, FONT_SIZE, GAME_OVER_COLOR, HINT_COLOR,
     HINT_FONT_SIZE, OVERLAY_ALPHA, SCREEN_HEIGHT, SCREEN_WIDTH,
-    SHADOW_COLOR, SHADOW_OFFSET, TEXT_COLOR
+    SHADOW_COLOR, SHADOW_OFFSET, TEXT_COLOR, VICTORY_COLOR
 )
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -47,3 +47,8 @@ def draw_pause():
 def draw_game_over():
     """Рисует надпись «Игра окончена» по центру экрана."""
     draw_message('Игра окончена', 'Нажмите любую клавишу', GAME_OVER_COLOR)
+
+
+def draw_victory():
+    """Рисует надпись «Победа!» по центру экрана."""
+    draw_message('Победа!', 'Нажмите любую клавишу', VICTORY_COLOR)

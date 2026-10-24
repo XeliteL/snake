@@ -3,7 +3,9 @@
 import pygame
 
 from controls import handle_keys
-from display import clock, draw_pause, draw_game_over, screen
+from display import (
+    clock, draw_game_over, draw_pause, draw_victory, screen
+)
 from game import check_collisions, eat_apple, eat_poison, reset_game
 from game_objects import Apple, GameObject, Poison, Snake, Stone
 from settings import (
@@ -45,7 +47,8 @@ def play_frame(snake, apple, poison, stone):
 def main():
     """Запускает игру и основной игровой цикл.
 
-    На паузе и после проигрыша змейка стоит, а на экране висит надпись.
+    На паузе, после проигрыша и после победы змейка стоит, а на экране
+    висит надпись.
     Когда игрок снимает флаг game_over, игра начинается заново.
     """
     pygame.init()
@@ -74,7 +77,10 @@ def main():
         if snake.game_over:
             if not game_over_shown:
                 game_over_shown = True
-                draw_game_over()
+                if snake.won:
+                    draw_victory()
+                else:
+                    draw_game_over()
                 pygame.display.update()
             continue
         if game_over_shown:
