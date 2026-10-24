@@ -52,6 +52,7 @@ EXPECTED_SNAKE_ATTRS = (
     ('атрибут', 'body_color'),
     ('атрибут', 'positions'),
     ('атрибут', 'direction'),
+    ('атрибут', 'paused'),
     ('метод', 'draw'),
     ('метод', 'get_head_position'),
     ('метод', 'move'),

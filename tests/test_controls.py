@@ -78,3 +78,25 @@ def test_quit_event_exits(monkeypatch):
     press(monkeypatch, pygame.event.Event(pygame.QUIT))
     with pytest.raises(SystemExit):
         handle_keys(Snake())
+
+
+@pytest.mark.parametrize(
+    'scancode', [pygame.KSCAN_P, pygame.KSCAN_ESCAPE], ids=['p', 'esc']
+)
+def test_pause_key_toggles_pause(monkeypatch, scancode):
+    snake = Snake()
+    press(monkeypatch, key_event(scancode))
+    handle_keys(snake)
+    assert snake.paused
+    handle_keys(snake)
+    assert not snake.paused
+
+
+def test_direction_keys_are_ignored_on_pause(monkeypatch):
+    snake = snake_moving(LEFT)
+    snake.paused = True
+    press(monkeypatch, key_event(pygame.KSCAN_UP))
+    handle_keys(snake)
+    assert snake.next_direction is None
+    assert snake.paused
+

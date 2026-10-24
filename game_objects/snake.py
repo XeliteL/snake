@@ -13,7 +13,8 @@ from settings import (
 class Snake(GameObject):
     """Змейка, управляемая игроком.
 
-    Хранит позиции сегментов тела, длину и направление движения.
+    Хранит позиции сегментов тела, длину, направление движения, скорость,
+    а также состояние паузы.
     """
 
     def __init__(
@@ -24,7 +25,8 @@ class Snake(GameObject):
             next_direction=None,
             last=None,
             body_color=SNAKE_COLOR,
-            speed=START_SPEED
+            speed=START_SPEED,
+            paused=False,
     ):
         """Создаёт змейку в центре поля."""
         super().__init__(body_color=body_color)
@@ -34,6 +36,7 @@ class Snake(GameObject):
         self.next_direction = next_direction
         self.last = last
         self.speed = speed
+        self.paused = paused
 
     def update_direction(self):
         """Применяет направление, выбранное игроком."""
@@ -83,4 +86,5 @@ class Snake(GameObject):
         self.next_direction = None
         self.last = None
         self.speed = START_SPEED
+        self.paused = False
         screen.fill(BOARD_BACKGROUND_COLOR)

@@ -3,7 +3,7 @@
 import pygame
 
 from controls import handle_keys
-from display import clock, screen
+from display import clock, draw_pause, screen
 from game import check_collisions, eat_apple, eat_poison
 from game_objects import Apple, GameObject, Poison, Snake, Stone
 from settings import (
@@ -27,11 +27,22 @@ def main():
     apple = Apple(occupied=snake.positions)
     poison = Poison()
     stone = Stone()
+    frame_before_pause = None
 
     while 1000 - 7:
         clock.tick(snake.speed)
 
         handle_keys(snake)
+        if snake.paused:
+            if frame_before_pause is None:
+                frame_before_pause = screen.copy()
+                draw_pause()
+                pygame.display.update()
+            continue
+        if frame_before_pause is not None:
+            screen.blit(frame_before_pause, (0, 0))
+            frame_before_pause = None
+
         snake.update_direction()
         snake.move()
 

@@ -79,6 +79,7 @@ def test_snake_reset_restores_start_state():
     snake.direction = LEFT
     snake.next_direction = UP
     snake.last = (0, 0)
+    snake.paused = True
     snake.reset()
     assert snake.length == 1
     assert snake.positions == [CENTER]
@@ -86,6 +87,7 @@ def test_snake_reset_restores_start_state():
     assert snake.direction == RIGHT
     assert snake.next_direction is None
     assert snake.last is None
+    assert not snake.paused
 
 
 # --- eat_apple ---
