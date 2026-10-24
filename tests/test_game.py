@@ -1,5 +1,6 @@
 """Тесты игровых объектов и логики из game.py."""
 
+import pygame
 import pytest
 
 from game import check_collisions, eat_apple, eat_poison, reset_game
@@ -16,6 +17,14 @@ ALL_CELLS = [
 CENTER = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 # Сколько раз повторять проверки со случайными клетками.
 REPEATS = 200
+# Время проигрыша, которое возвращает подменённый pygame.time.get_ticks.
+NOW = 12345
+
+
+@pytest.fixture
+def frozen_ticks(monkeypatch):
+    """Подменяет текущее время pygame на NOW."""
+    monkeypatch.setattr(pygame.time, 'get_ticks', lambda: NOW)
 
 
 @pytest.fixture
@@ -80,6 +89,8 @@ def test_snake_reset_restores_start_state():
     snake.next_direction = UP
     snake.last = (0, 0)
     snake.paused = True
+    snake.game_over = True
+    snake.game_over_time = NOW
     snake.reset()
     assert snake.length == 1
     assert snake.positions == [CENTER]
@@ -88,7 +99,17 @@ def test_snake_reset_restores_start_state():
     assert snake.next_direction is None
     assert snake.last is None
     assert not snake.paused
+    assert not snake.game_over
+    assert snake.game_over_time == 0
 
+
+
+@pytest.mark.usefixtures('frozen_ticks')
+def test_snake_die_ends_game_and_remembers_time():
+    snake = Snake()
+    snake.die()
+    assert snake.game_over
+    assert snake.game_over_time == NOW
 
 # --- eat_apple ---
 
@@ -149,16 +170,28 @@ def test_eat_poison_removes_only_eaten_one(objects):
     assert poison.positions == [(0, 0)]
 
 
-def test_eat_poison_at_length_one_resets_game(objects):
+@pytest.mark.usefixtures('frozen_ticks')
+def test_eat_poison_at_length_one_ends_game(objects):
     snake, apple, poison, stone = objects
     snake.positions = [(0, 0)]
     poison.positions = [(0, 0), (40, 40)]
     stone.positions = [(100, 100)]
     eat_poison(snake, apple, poison, stone)
-    assert snake.length == 1
-    assert snake.positions == [CENTER]
-    assert poison.positions == []
-    assert stone.positions == []
+    assert snake.game_over
+    assert snake.game_over_time == NOW
+    # Поле не сбрасывается: это сделает main() после нажатия клавиши.
+    assert snake.length == 0
+    assert poison.positions == [(0, 0), (40, 40)]
+    assert stone.positions == [(100, 100)]
+
+
+def test_eat_poison_keeps_game_while_snake_is_long(objects):
+    snake, apple, poison, stone = objects
+    snake.length = 2
+    snake.positions = [CENTER, (300, 240)]
+    poison.positions = [CENTER]
+    eat_poison(snake, apple, poison, stone)
+    assert not snake.game_over
 
 
 def test_eat_poison_shortens_body(objects):
@@ -180,25 +213,32 @@ def test_no_collision_keeps_game(objects):
     check_collisions(snake, apple, poison, stone)
     assert snake.length == 3
     assert stone.positions == [(0, 0)]
+    assert not snake.game_over
 
 
-def test_collision_with_self_resets_game(objects):
+@pytest.mark.usefixtures('frozen_ticks')
+def test_collision_with_self_ends_game(objects):
     snake, apple, poison, stone = objects
     snake.length = 4
     snake.positions = [(0, 0), (20, 0), (0, 0)]
     poison.positions = [(40, 40)]
     check_collisions(snake, apple, poison, stone)
-    assert snake.length == 1
-    assert poison.positions == []
+    assert snake.game_over
+    assert snake.game_over_time == NOW
+    assert snake.length == 4
+    assert poison.positions == [(40, 40)]
 
 
-def test_collision_with_stone_resets_game(objects):
+@pytest.mark.usefixtures('frozen_ticks')
+def test_collision_with_stone_ends_game(objects):
     snake, apple, poison, stone = objects
     snake.length = 4
     stone.positions = [CENTER]
     check_collisions(snake, apple, poison, stone)
-    assert snake.length == 1
-    assert stone.positions == []
+    assert snake.game_over
+    assert snake.game_over_time == NOW
+    assert snake.length == 4
+    assert stone.positions == [CENTER]
 
 
 def test_reset_game_moves_apple_off_snake(objects):

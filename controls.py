@@ -2,7 +2,7 @@
 
 import pygame
 
-from settings import DOWN, LEFT, RIGHT, UP
+from settings import DOWN, GAME_OVER_DELAY, LEFT, RIGHT, UP
 
 
 def change_direction(game_object, event):
@@ -26,17 +26,24 @@ def change_direction(game_object, event):
 
 
 def handle_keys(game_object):
-    """Обрабатывает события: закрытие окна, пауза и движение.
+    """Обрабатывает события: закрытие окна, проигрыш, пауза и движение.
 
-    P или Esc ставят игру на паузу и снимают с неё; на паузе стрелки
-    и WASD игнорируются. Остальные нажатия передаются в change_direction.
+    После проигрыша любая клавиша снимает флаг game_over, но только
+    когда прошло GAME_OVER_DELAY миллисекунд; более ранние нажатия
+    игнорируются. P или Esc ставят игру на паузу и снимают с неё;
+    на паузе стрелки и WASD игнорируются. Остальные нажатия передаются
+    в change_direction.
     """
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
         elif event.type == pygame.KEYDOWN:
-            if event.scancode in (pygame.KSCAN_P, pygame.KSCAN_ESCAPE):
+            if game_object.game_over:
+                if (pygame.time.get_ticks() - game_object.game_over_time
+                        >= GAME_OVER_DELAY):
+                    game_object.game_over = False
+            elif event.scancode in (pygame.KSCAN_P, pygame.KSCAN_ESCAPE):
                 game_object.paused = not game_object.paused
             elif game_object.paused:
                 continue

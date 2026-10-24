@@ -5,7 +5,7 @@ import pytest
 
 from controls import handle_keys
 from game_objects import Snake
-from settings import DOWN, LEFT, RIGHT, UP
+from settings import DOWN, GAME_OVER_DELAY, LEFT, RIGHT, UP
 
 OPPOSITE = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
 KEYS = [
@@ -100,3 +100,27 @@ def test_direction_keys_are_ignored_on_pause(monkeypatch):
     assert snake.next_direction is None
     assert snake.paused
 
+
+def test_keys_ignored_right_after_game_over(monkeypatch):
+    snake = Snake()
+    snake.game_over = True
+    snake.game_over_time = 5000
+    monkeypatch.setattr(
+        pygame.time, 'get_ticks', lambda: 5000 + GAME_OVER_DELAY - 1
+    )
+    press(monkeypatch, key_event(pygame.KSCAN_UP))
+    handle_keys(snake)
+    assert snake.game_over
+    assert snake.next_direction is None
+
+
+def test_any_key_ends_game_over_after_delay(monkeypatch):
+    snake = Snake()
+    snake.game_over = True
+    snake.game_over_time = 5000
+    monkeypatch.setattr(
+        pygame.time, 'get_ticks', lambda: 5000 + GAME_OVER_DELAY
+    )
+    press(monkeypatch, key_event(pygame.KSCAN_UP))
+    handle_keys(snake)
+    assert not snake.game_over

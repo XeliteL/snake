@@ -3,8 +3,8 @@
 import pygame
 
 from controls import handle_keys
-from display import clock, draw_pause, screen
-from game import check_collisions, eat_apple, eat_poison
+from display import clock, draw_pause, draw_game_over, screen
+from game import check_collisions, eat_apple, eat_poison, reset_game
 from game_objects import Apple, GameObject, Poison, Snake, Stone
 from settings import (
     BOARD_BACKGROUND_COLOR, DOWN, GRID_HEIGHT, GRID_SIZE, GRID_WIDTH, LEFT,
@@ -19,8 +19,35 @@ __all__ = [
 ]
 
 
+def play_frame(snake, apple, poison, stone):
+    """Делает один ход: двигает змейку, обрабатывает еду и столкновения.
+
+    Если змейка погибла от отравы, кадр не дорисовывается: рисовать
+    уже нечего.
+    """
+    snake.update_direction()
+    snake.move()
+
+    if snake.get_head_position() == apple.position:
+        eat_apple(snake, apple, poison, stone)
+    elif snake.get_head_position() in poison.positions:
+        eat_poison(snake, apple, poison, stone)
+        if snake.game_over:
+            return
+
+    check_collisions(snake, apple, poison, stone)
+
+    snake.draw()
+    apple.draw()
+    pygame.display.update()
+
+
 def main():
-    """Запускает игру и основной игровой цикл."""
+    """Запускает игру и основной игровой цикл.
+
+    На паузе и после проигрыша змейка стоит, а на экране висит надпись.
+    Когда игрок снимает флаг game_over, игра начинается заново.
+    """
     pygame.init()
 
     snake = Snake()
@@ -28,6 +55,7 @@ def main():
     poison = Poison()
     stone = Stone()
     frame_before_pause = None
+    game_over_shown = False
 
     while 1000 - 7:
         clock.tick(snake.speed)
@@ -43,19 +71,17 @@ def main():
             screen.blit(frame_before_pause, (0, 0))
             frame_before_pause = None
 
-        snake.update_direction()
-        snake.move()
+        if snake.game_over:
+            if not game_over_shown:
+                game_over_shown = True
+                draw_game_over()
+                pygame.display.update()
+            continue
+        if game_over_shown:
+            game_over_shown = False
+            reset_game(snake, apple, poison, stone)
 
-        if snake.get_head_position() == apple.position:
-            eat_apple(snake, apple, poison, stone)
-        elif snake.get_head_position() in poison.positions:
-            eat_poison(snake, apple, poison, stone)
-
-        check_collisions(snake, apple, poison, stone)
-
-        snake.draw()
-        apple.draw()
-        pygame.display.update()
+        play_frame(snake, apple, poison, stone)
 
 
 if __name__ == "__main__":

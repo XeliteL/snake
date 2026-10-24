@@ -1,4 +1,4 @@
-"""Игровая логика: поедание еды и столкновения."""
+"""Игровая логика: поедание еды, столкновения и сброс игры."""
 
 from settings import (
     FAST_SPEED,
@@ -54,17 +54,21 @@ def reset_game(snake, apple, poison, stone):
 
 
 def eat_poison(snake, apple, poison, stone):
-    """Укорачивает змейку; если длина стала нулевой — сбрасывает игру."""
+    """Укорачивает и замедляет змейку, убирает съеденную отраву.
+
+    Если длина стала нулевой, партия проиграна: поле не трогается,
+    его сбросит main() после нажатия клавиши.
+    """
     snake.delete_tail()
     snake.speed -= FAST_SPEED_STEP
     if snake.length == 0:
-        reset_game(snake, apple, poison, stone)
+        snake.die()
         return
     poison.positions.remove(snake.get_head_position())
 
 
 def check_collisions(snake, apple, poison, stone):
-    """Сбрасывает игру, если змейка врезалась в себя или в камень."""
+    """Завершает партию, если змейка врезалась в себя или в камень."""
     if (snake.get_head_position() in snake.positions[1:]
             or snake.get_head_position() in stone.positions):
-        reset_game(snake, apple, poison, stone)
+        snake.die()
