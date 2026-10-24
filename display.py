@@ -1,9 +1,10 @@
 """Окно игры, таймер и надписи паузы и проигрыша."""
-
 import pygame
 
 from settings import (
-    FONT_SIZE, TEXT_COLOR, SCREEN_HEIGHT, SCREEN_WIDTH
+    BOARD_BACKGROUND_COLOR, FONT_SIZE, GAME_OVER_COLOR, HINT_COLOR,
+    HINT_FONT_SIZE, OVERLAY_ALPHA, SCREEN_HEIGHT, SCREEN_WIDTH,
+    SHADOW_COLOR, SHADOW_OFFSET, TEXT_COLOR
 )
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
@@ -11,18 +12,38 @@ pygame.display.set_caption("Змейка")
 clock = pygame.time.Clock()
 
 
-def draw_message(message):
-    """Рисует надпись по центру экрана."""
-    font = pygame.font.Font(None, FONT_SIZE)
-    text = font.render(message, True, TEXT_COLOR)
-    screen.blit(text, text.get_rect(center=screen.get_rect().center))
+def draw_overlay():
+    """Затемняет всё поле полупрозрачным слоем."""
+    overlay = pygame.Surface(screen.get_size())
+    overlay.fill(BOARD_BACKGROUND_COLOR)
+    overlay.set_alpha(OVERLAY_ALPHA)
+    screen.blit(overlay, (0, 0))
+
+
+def draw_text(message, size, color, center):
+    """Рисует текст с тенью, центрируя его в точке center."""
+    font = pygame.font.Font(None, size)
+    shadow = font.render(message, True, SHADOW_COLOR)
+    text = font.render(message, True, color)
+    shadow_center = (center[0] + SHADOW_OFFSET, center[1] + SHADOW_OFFSET)
+    screen.blit(shadow, shadow.get_rect(center=shadow_center))
+    screen.blit(text, text.get_rect(center=center))
+
+
+def draw_message(title, hint, color=TEXT_COLOR):
+    """Затемняет поле и рисует крупный заголовок с подсказкой под ним."""
+    draw_overlay()
+    center_x, center_y = screen.get_rect().center
+    draw_text(title, FONT_SIZE, color, (center_x, center_y - FONT_SIZE // 4))
+    draw_text(hint, HINT_FONT_SIZE, HINT_COLOR,
+              (center_x, center_y + FONT_SIZE // 2))
 
 
 def draw_pause():
     """Рисует надпись «Пауза» по центру экрана."""
-    draw_message('Пауза')
+    draw_message('Пауза', 'P или Esc — продолжить')
 
 
 def draw_game_over():
     """Рисует надпись «Игра окончена» по центру экрана."""
-    draw_message('Игра окончена')
+    draw_message('Игра окончена', 'Нажмите любую клавишу', GAME_OVER_COLOR)
