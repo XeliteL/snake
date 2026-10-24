@@ -22,9 +22,9 @@ class CellGroup(GameObject):
         return new_position
 
     def draw(self):
-        """Отрисовывает последнюю добавленную клетку, если она есть."""
-        if self.positions:
-            self.draw_cell(self.positions[-1])
+        """Отрисовывает все клетки набора."""
+        for position in self.positions:
+            self.draw_cell(position)
 
     def reset(self):
         """Убирает все клетки с поля."""

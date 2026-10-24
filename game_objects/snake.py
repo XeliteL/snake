@@ -2,10 +2,9 @@
 
 import pygame
 
-from display import screen
 from game_objects.base import GameObject
 from settings import (
-    BOARD_BACKGROUND_COLOR, GRID_SIZE, RIGHT, SCREEN_HEIGHT,
+    GRID_SIZE, RIGHT, SCREEN_HEIGHT,
     SCREEN_WIDTH, SNAKE_COLOR, START_SPEED
 )
 
@@ -23,7 +22,6 @@ class Snake(GameObject):
             positions=[(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)],
             direction=RIGHT,
             next_direction=None,
-            last=None,
             body_color=SNAKE_COLOR,
             speed=START_SPEED,
             paused=False,
@@ -37,7 +35,6 @@ class Snake(GameObject):
         self.positions = list(positions)
         self.direction = direction
         self.next_direction = next_direction
-        self.last = last
         self.speed = speed
         self.paused = paused
         self.game_over = game_over
@@ -60,29 +57,21 @@ class Snake(GameObject):
         )
         self.positions.insert(0, new_head)
         if len(self.positions) > self.length:
-            self.last = self.positions.pop()
+            self.positions.pop()
 
     def get_head_position(self):
         """Возвращает позицию головы змейки."""
         return self.positions[0]
 
     def draw(self):
-        """Отрисовывает змейку и затирает след хвоста."""
-        for position in self.positions[1:-1]:
+        """Отрисовывает все сегменты змейки."""
+        for position in self.positions:
             self.draw_cell(position)
 
-        self.draw_cell(self.positions[0])
-
-        if self.last:
-            last_rect = pygame.Rect(self.last, (GRID_SIZE, GRID_SIZE))
-            pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, last_rect)
-
     def delete_tail(self):
-        """Укорачивает змейку на один сегмент и стирает его с экрана."""
+        """Укорачивает змейку на один сегмент."""
         self.length -= 1
-        tail = self.positions.pop()
-        tail_rect = pygame.Rect(tail, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, BOARD_BACKGROUND_COLOR, tail_rect)
+        self.positions.pop()
 
     def die(self):
         """Завершает партию и запоминает время проигрыша."""
@@ -95,15 +84,13 @@ class Snake(GameObject):
         self.die()
 
     def reset(self):
-        """Возвращает змейку в начальное состояние и очищает экран."""
+        """Возвращает змейку в начальное состояние."""
         self.length = 1
         self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
         self.direction = RIGHT
         self.next_direction = None
-        self.last = None
         self.speed = START_SPEED
         self.paused = False
         self.game_over = False
         self.game_over_time = 0
         self.won = False
-        screen.fill(BOARD_BACKGROUND_COLOR)

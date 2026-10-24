@@ -24,8 +24,9 @@ __all__ = [
 def play_frame(snake, apple, poison, stone):
     """Делает один ход: двигает змейку, обрабатывает еду и столкновения.
 
-    Если змейка погибла от отравы, кадр не дорисовывается: рисовать
-    уже нечего.
+    Кадр каждый раз рисуется заново: экран заливается фоном, затем
+    рисуются все объекты. Если змейка погибла от отравы, кадр не
+    перерисовывается: рисовать уже нечего.
     """
     snake.update_direction()
     snake.move()
@@ -39,8 +40,11 @@ def play_frame(snake, apple, poison, stone):
 
     check_collisions(snake, apple, poison, stone)
 
+    screen.fill(BOARD_BACKGROUND_COLOR)
     snake.draw()
     apple.draw()
+    poison.draw()
+    stone.draw()
     pygame.display.update()
 
 
@@ -57,7 +61,7 @@ def main():
     apple = Apple(occupied=snake.positions)
     poison = Poison()
     stone = Stone()
-    frame_before_pause = None
+    pause_shown = False
     game_over_shown = False
 
     while 1000 - 7:
@@ -65,14 +69,12 @@ def main():
 
         handle_keys(snake)
         if snake.paused:
-            if frame_before_pause is None:
-                frame_before_pause = screen.copy()
+            if not pause_shown:
+                pause_shown = True
                 draw_pause()
                 pygame.display.update()
             continue
-        if frame_before_pause is not None:
-            screen.blit(frame_before_pause, (0, 0))
-            frame_before_pause = None
+        pause_shown = False
 
         if snake.game_over:
             if not game_over_shown:

@@ -36,20 +36,18 @@ def eat_apple(snake, apple, poison, stone):
         if snake.length % POISON_EVERY_APPLES == 0:
             poison.randomize_position(
                 snake.positions + stone.positions
-                + [snake.last, apple.position]
+                + [apple.position]
             )
-            poison.draw()
     else:
         snake.speed += MAX_SPEED_STEP
         head_x, head_y = snake.get_head_position()
         if len(stone.positions) < MAX_STONES:
             stone.randomize_position(
                 snake.positions
-                + [snake.last, apple.position] + poison.positions
+                + [apple.position] + poison.positions
                 + [(x, head_y) for x in range(0, SCREEN_WIDTH, GRID_SIZE)]
                 + [(head_x, y) for y in range(0, SCREEN_HEIGHT, GRID_SIZE)]
             )
-            stone.draw()
 
 
 def reset_game(snake, apple, poison, stone):
