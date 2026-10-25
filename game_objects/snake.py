@@ -4,8 +4,8 @@ import pygame
 
 from game_objects.base import GameObject
 from settings import (
-    SNAKE_CORNERS, GRID_SIZE, RIGHT, SCREEN_HEIGHT,
-    SCREEN_WIDTH, SNAKE_COLOR, START_SPEED,
+    GRID_SIZE, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH,
+    SNAKE_COLOR, SNAKE_CORNERS, START_SPEED,
 )
 
 
@@ -84,7 +84,7 @@ class Snake(GameObject):
 
     def get_tail_direction(self):
         """Возвращает направление хвоста змейки — от тела наружу."""
-        tail_x, tail_y = self.positions[-1]
+        tail_x, tail_y = self.get_tail_position()
         before_tail_x, before_tail_y = self.positions[-2]
         return (
             self.get_step(tail_x - before_tail_x, SCREEN_WIDTH),
