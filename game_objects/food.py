@@ -2,15 +2,15 @@
 
 from game_objects.base import GameObject
 from game_objects.cells import CellGroup
-from settings import APPLE_COLOR, POISON_COLOR
+from settings import APPLE_COLOR, BORDER_RADIUS, POISON_COLOR
 
 
 class Food(GameObject):
     """Еда, которая появляется в случайной клетке поля."""
 
-    def __init__(self, body_color):
+    def __init__(self, body_color, border_radius=0):
         """Задаёт цвет еды; позицию выбирают наследники."""
-        super().__init__(body_color=body_color)
+        super().__init__(body_color=body_color, border_radius=border_radius)
 
     def randomize_position(self, occupied=()):
         """Перемещает еду в случайную клетку и возвращает её.
@@ -30,9 +30,14 @@ class Food(GameObject):
 class Apple(Food):
     """Яблоко, которое появляется в случайной клетке поля."""
 
-    def __init__(self, body_color=APPLE_COLOR, occupied=()):
+    def __init__(
+            self,
+            body_color=APPLE_COLOR,
+            occupied=(),
+            border_radius=BORDER_RADIUS
+    ):
         """Создаёт яблоко в случайной позиции."""
-        super().__init__(body_color=body_color)
+        super().__init__(body_color=body_color, border_radius=border_radius)
         self.randomize_position(occupied)
 
 
@@ -42,6 +47,15 @@ class Poison(CellGroup):
     Появляется не с начала игры, а каждые 10 яблок.
     """
 
-    def __init__(self, body_color=POISON_COLOR, positions=()):
+    def __init__(
+            self,
+            body_color=POISON_COLOR,
+            positions=(),
+            border_radius=BORDER_RADIUS
+    ):
         """Создаёт отраву; по умолчанию на поле её нет."""
-        super().__init__(body_color=body_color, positions=positions)
+        super().__init__(
+            body_color=body_color,
+            positions=positions,
+            border_radius=border_radius
+        )

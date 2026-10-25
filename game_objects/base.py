@@ -17,10 +17,16 @@ ALL_CELLS = [
 class GameObject:
     """Базовый класс для всех игровых объектов."""
 
-    def __init__(self, position=(0, 0), body_color=(255, 255, 255)):
+    def __init__(
+            self,
+            position=(0, 0),
+            body_color=(255, 255, 255),
+            border_radius=0
+    ):
         """Задаёт позицию и цвет объекта."""
         self.position = position
         self.body_color = body_color
+        self.border_radius = border_radius
 
     @staticmethod
     def random_cell(occupied=()):
@@ -38,8 +44,19 @@ class GameObject:
     def draw_cell(self, position):
         """Рисует клетку цвета объекта с рамкой."""
         rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
-        pygame.draw.rect(screen, self.body_color, rect)
-        pygame.draw.rect(screen, BORDER_COLOR, rect, 1)
+        pygame.draw.rect(
+            screen,
+            self.body_color,
+            rect,
+            border_radius=self.border_radius
+        )
+        pygame.draw.rect(
+            screen,
+            BORDER_COLOR,
+            rect,
+            1,
+            border_radius=self.border_radius
+        )
 
     def draw(self):
         """Отрисовывает объект на экране."""

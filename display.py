@@ -1,4 +1,5 @@
 """Окно игры, таймер и надписи паузы, проигрыша и победы."""
+
 import pygame
 
 from settings import (

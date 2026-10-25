@@ -6,9 +6,9 @@ from game_objects.base import GameObject
 class CellGroup(GameObject):
     """Набор клеток одного цвета, которые добавляются по одной."""
 
-    def __init__(self, body_color, positions=()):
+    def __init__(self, body_color, positions=(), border_radius=0):
         """Создаёт набор; по умолчанию он пустой."""
-        super().__init__(body_color=body_color)
+        super().__init__(body_color=body_color, border_radius=border_radius)
         self.positions = list(positions)
 
     def randomize_position(self, occupied=()):
