@@ -23,6 +23,30 @@ SHADOW_COLOR = (0, 0, 0)
 SHADOW_OFFSET = 4
 OVERLAY_ALPHA = 160
 BORDER_RADIUS = 8
+SNAKE_CORNERS = {
+    UP: {
+        "border_top_left_radius": BORDER_RADIUS,
+        "border_top_right_radius": BORDER_RADIUS,
+    },
+    RIGHT: {
+        "border_top_right_radius": BORDER_RADIUS,
+        "border_bottom_right_radius": BORDER_RADIUS,
+    },
+    DOWN: {
+        "border_bottom_left_radius": BORDER_RADIUS,
+        "border_bottom_right_radius": BORDER_RADIUS,
+    },
+    LEFT: {
+        "border_top_left_radius": BORDER_RADIUS,
+        "border_bottom_left_radius": BORDER_RADIUS,
+    },
+    "ALL": {
+        "border_top_left_radius": BORDER_RADIUS,
+        "border_top_right_radius": BORDER_RADIUS,
+        "border_bottom_left_radius": BORDER_RADIUS,
+        "border_bottom_right_radius": BORDER_RADIUS,
+    },
+}
 FONT_SIZE = 72
 HINT_FONT_SIZE = 28
 GAME_OVER_DELAY = 1000

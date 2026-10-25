@@ -4,8 +4,8 @@ import pygame
 
 from game_objects.base import GameObject
 from settings import (
-    GRID_SIZE, RIGHT, SCREEN_HEIGHT,
-    SCREEN_WIDTH, SNAKE_COLOR, START_SPEED
+    SNAKE_CORNERS, GRID_SIZE, RIGHT, SCREEN_HEIGHT,
+    SCREEN_WIDTH, SNAKE_COLOR, START_SPEED,
 )
 
 
@@ -63,10 +63,48 @@ class Snake(GameObject):
         """Возвращает позицию головы змейки."""
         return self.positions[0]
 
+    def get_tail_position(self):
+        """Возвращает позицию хвоста змейки."""
+        return self.positions[-1]
+
+    @staticmethod
+    def get_step(delta, size):
+        """Переводит разницу координат соседних клеток в -1, 0 или 1.
+
+        Остаток от деления на size убирает переход через край поля:
+        остаются только 0, GRID_SIZE (шаг вперёд) и size - GRID_SIZE
+        (шаг назад).
+        """
+        delta %= size
+        if delta == 0:
+            return 0
+        if delta == GRID_SIZE:
+            return 1
+        return -1
+
+    def get_tail_direction(self):
+        """Возвращает направление хвоста змейки — от тела наружу."""
+        tail_x, tail_y = self.positions[-1]
+        before_tail_x, before_tail_y = self.positions[-2]
+        return (
+            self.get_step(tail_x - before_tail_x, SCREEN_WIDTH),
+            self.get_step(tail_y - before_tail_y, SCREEN_HEIGHT)
+        )
+
     def draw(self):
         """Отрисовывает все сегменты змейки."""
-        for position in self.positions:
-            self.draw_cell(position)
+        if len(self.positions) > 1:
+            for position in self.positions[1:-1]:
+                self.draw_cell(position)
+            self.draw_cell(
+                self.positions[0], SNAKE_CORNERS[self.direction]
+            )
+            self.draw_cell(
+                self.positions[-1],
+                SNAKE_CORNERS[self.get_tail_direction()]
+            )
+        else:
+            self.draw_cell(self.positions[0], SNAKE_CORNERS["ALL"])
 
     def delete_tail(self):
         """Укорачивает змейку на один сегмент."""

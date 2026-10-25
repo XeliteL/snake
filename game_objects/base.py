@@ -41,21 +41,26 @@ class GameObject:
             return choice(free_cells)
         return None
 
-    def draw_cell(self, position):
+    def draw_cell(self, position, corners=None):
         """Рисует клетку цвета объекта с рамкой."""
+        if corners is None:
+            corners = {}
+
         rect = pygame.Rect(position, (GRID_SIZE, GRID_SIZE))
         pygame.draw.rect(
             screen,
             self.body_color,
             rect,
-            border_radius=self.border_radius
+            border_radius=self.border_radius,
+            **corners
         )
         pygame.draw.rect(
             screen,
             BORDER_COLOR,
             rect,
             1,
-            border_radius=self.border_radius
+            border_radius=self.border_radius,
+            **corners
         )
 
     def draw(self):
