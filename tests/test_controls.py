@@ -5,7 +5,9 @@ import pytest
 
 from controls import handle_keys
 from game_objects import Snake
-from settings import DOWN, GAME_OVER_DELAY, LEFT, RIGHT, UP
+from settings import (
+    DOWN, GAME_OVER_DELAY, LEFT, MAX_QUEUED_TURNS, RIGHT, UP,
+)
 
 OPPOSITE = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
 KEYS = [
@@ -45,7 +47,7 @@ def test_key_sets_direction(monkeypatch, scancode, direction):
     snake = snake_moving(start)
     press(monkeypatch, key_event(scancode))
     handle_keys(snake)
-    assert snake.next_direction == direction
+    assert snake.direction_queue == [direction]
 
 
 @pytest.mark.parametrize('scancode, direction', KEYS, ids=KEY_NAMES)
@@ -53,7 +55,7 @@ def test_reverse_is_blocked(monkeypatch, scancode, direction):
     snake = snake_moving(OPPOSITE[direction])
     press(monkeypatch, key_event(scancode))
     handle_keys(snake)
-    assert snake.next_direction is None
+    assert snake.direction_queue == []
 
 
 def test_wasd_works_with_russian_layout(monkeypatch):
@@ -61,15 +63,61 @@ def test_wasd_works_with_russian_layout(monkeypatch):
     # Физическая W при русской раскладке даёт символ «ц».
     press(monkeypatch, key_event(pygame.KSCAN_W, key=ord('ц')))
     handle_keys(snake)
-    assert snake.next_direction == UP
+    assert snake.direction_queue == [UP]
 
 
 def test_other_keys_are_ignored(monkeypatch):
     snake = snake_moving(RIGHT)
     press(monkeypatch, key_event(pygame.KSCAN_SPACE))
     handle_keys(snake)
-    assert snake.next_direction is None
+    assert snake.direction_queue == []
     assert snake.direction == RIGHT
+
+
+def test_quick_turns_are_queued(monkeypatch):
+    # Быстрое ↑, затем ← за один тик: второе нажатие не теряется.
+    snake = snake_moving(RIGHT)
+    press(
+        monkeypatch,
+        key_event(pygame.KSCAN_UP),
+        key_event(pygame.KSCAN_LEFT),
+    )
+    handle_keys(snake)
+    assert snake.direction_queue == [UP, LEFT]
+    snake.update_direction()
+    assert snake.direction == UP
+    snake.update_direction()
+    assert snake.direction == LEFT
+
+
+def test_reverse_of_queued_turn_is_blocked(monkeypatch):
+    snake = snake_moving(RIGHT)
+    press(
+        monkeypatch,
+        key_event(pygame.KSCAN_UP),
+        key_event(pygame.KSCAN_DOWN),
+    )
+    handle_keys(snake)
+    assert snake.direction_queue == [UP]
+
+
+def test_repeated_key_is_not_queued_twice(monkeypatch):
+    snake = snake_moving(RIGHT)
+    press(monkeypatch, key_event(pygame.KSCAN_UP), key_event(pygame.KSCAN_UP))
+    handle_keys(snake)
+    assert snake.direction_queue == [UP]
+
+
+def test_queue_is_limited(monkeypatch):
+    snake = snake_moving(RIGHT)
+    press(
+        monkeypatch,
+        key_event(pygame.KSCAN_UP),
+        key_event(pygame.KSCAN_LEFT),
+        key_event(pygame.KSCAN_DOWN),
+    )
+    handle_keys(snake)
+    assert len(snake.direction_queue) == MAX_QUEUED_TURNS
 
 
 def test_quit_event_exits(monkeypatch):
@@ -97,7 +145,7 @@ def test_direction_keys_are_ignored_on_pause(monkeypatch):
     snake.paused = True
     press(monkeypatch, key_event(pygame.KSCAN_UP))
     handle_keys(snake)
-    assert snake.next_direction is None
+    assert snake.direction_queue == []
     assert snake.paused
 
 
@@ -111,7 +159,7 @@ def test_keys_ignored_right_after_game_over(monkeypatch):
     press(monkeypatch, key_event(pygame.KSCAN_UP))
     handle_keys(snake)
     assert snake.game_over
-    assert snake.next_direction is None
+    assert snake.direction_queue == []
 
 
 def test_any_key_ends_game_over_after_delay(monkeypatch):

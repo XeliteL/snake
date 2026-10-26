@@ -5,24 +5,27 @@ import pygame
 from settings import DOWN, GAME_OVER_DELAY, LEFT, RIGHT, UP
 
 
+DIRECTION_KEYS = {
+    pygame.KSCAN_W: UP,
+    pygame.KSCAN_UP: UP,
+    pygame.KSCAN_S: DOWN,
+    pygame.KSCAN_DOWN: DOWN,
+    pygame.KSCAN_A: LEFT,
+    pygame.KSCAN_LEFT: LEFT,
+    pygame.KSCAN_D: RIGHT,
+    pygame.KSCAN_RIGHT: RIGHT,
+}
+
+
 def change_direction(game_object, event):
-    """Выбирает новое направление по нажатой стрелке или WASD.
+    """Ставит в очередь поворот по нажатой стрелке или WASD.
 
     Клавиши определяются по сканкоду, поэтому WASD работает при любой
-    раскладке. Запрещает разворот змейки на 180 градусов.
+    раскладке. Развороты на 180 градусов отсекает queue_direction.
     """
-    if (event.scancode in (pygame.KSCAN_W, pygame.KSCAN_UP)
-            and game_object.direction != DOWN):
-        game_object.next_direction = UP
-    elif (event.scancode in (pygame.KSCAN_S, pygame.KSCAN_DOWN)
-            and game_object.direction != UP):
-        game_object.next_direction = DOWN
-    elif (event.scancode in (pygame.KSCAN_A, pygame.KSCAN_LEFT)
-            and game_object.direction != RIGHT):
-        game_object.next_direction = LEFT
-    elif (event.scancode in (pygame.KSCAN_D, pygame.KSCAN_RIGHT)
-            and game_object.direction != LEFT):
-        game_object.next_direction = RIGHT
+    direction = DIRECTION_KEYS.get(event.scancode)
+    if direction:
+        game_object.queue_direction(direction)
 
 
 def handle_keys(game_object):

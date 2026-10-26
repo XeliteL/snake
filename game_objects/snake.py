@@ -4,7 +4,7 @@ import pygame
 
 from game_objects.base import GameObject
 from settings import (
-    GRID_SIZE, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH,
+    GRID_SIZE, MAX_QUEUED_TURNS, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH,
     SNAKE_COLOR, SNAKE_CORNERS, START_SCORE, START_SPEED,
 )
 
@@ -21,7 +21,7 @@ class Snake(GameObject):
             length=1,
             positions=[(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)],
             direction=RIGHT,
-            next_direction=None,
+            direction_queue=(),
             body_color=SNAKE_COLOR,
             speed=START_SPEED,
             score=START_SCORE,
@@ -35,7 +35,7 @@ class Snake(GameObject):
         self.length = length
         self.positions = list(positions)
         self.direction = direction
-        self.next_direction = next_direction
+        self.direction_queue = list(direction_queue)
         self.speed = speed
         self.score = score
         self.paused = paused
@@ -43,11 +43,27 @@ class Snake(GameObject):
         self.game_over_time = game_over_time
         self.won = won
 
+    def queue_direction(self, direction):
+        """Добавляет поворот в очередь нажатий.
+
+        Поворот сравнивается с последним направлением в очереди, а если
+        она пуста, то с текущим. Повтор того же направления и разворот
+        на 180 градусов игнорируются, как и нажатия сверх
+        MAX_QUEUED_TURNS.
+        """
+        last = self.direction_queue[-1] if self.direction_queue else (
+            self.direction
+        )
+        if (direction == last
+                or direction == (-last[0], -last[1])
+                or len(self.direction_queue) >= MAX_QUEUED_TURNS):
+            return
+        self.direction_queue.append(direction)
+
     def update_direction(self):
-        """Применяет направление, выбранное игроком."""
-        if self.next_direction:
-            self.direction = self.next_direction
-            self.next_direction = None
+        """Применяет первый поворот из очереди нажатий."""
+        if self.direction_queue:
+            self.direction = self.direction_queue.pop(0)
 
     def move(self):
         """Сдвигает змейку на одну клетку с переходом через края поля."""
@@ -128,7 +144,7 @@ class Snake(GameObject):
         self.length = 1
         self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
         self.direction = RIGHT
-        self.next_direction = None
+        self.direction_queue = []
         self.speed = START_SPEED
         self.score = START_SCORE
         self.paused = False

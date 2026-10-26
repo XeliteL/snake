@@ -97,7 +97,7 @@ def test_snake_reset_restores_start_state():
     snake.length = 5
     snake.speed = 20
     snake.direction = LEFT
-    snake.next_direction = UP
+    snake.direction_queue = [UP]
     snake.paused = True
     snake.game_over = True
     snake.game_over_time = NOW
@@ -106,7 +106,7 @@ def test_snake_reset_restores_start_state():
     assert snake.positions == [CENTER]
     assert snake.speed == START_SPEED
     assert snake.direction == RIGHT
-    assert snake.next_direction is None
+    assert snake.direction_queue == []
     assert not snake.paused
     assert not snake.game_over
     assert snake.game_over_time == 0
