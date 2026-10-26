@@ -2,14 +2,18 @@
 
 from settings import (
     FAST_SPEED,
+    FAST_SCORE_STEP,
     FAST_SPEED_STEP,
     GRID_SIZE,
     MAX_SPEED,
+    MAX_SCORE_STEP,
     MAX_SPEED_STEP,
     MAX_STONES,
     POISON_EVERY_APPLES,
+    POISON_SCORE_STEP,
     SCREEN_HEIGHT,
     SCREEN_WIDTH,
+    SLOW_SCORE_STEP,
     SLOW_SPEED_STEP,
     WIN_LENGTH,
 )
@@ -22,6 +26,7 @@ def eat_apple(snake, apple, poison, stone):
     """
     snake.length += 1
     if snake.length >= WIN_LENGTH:
+        snake.score += MAX_SCORE_STEP
         snake.win()
         return
     apple.randomize_position(
@@ -30,8 +35,10 @@ def eat_apple(snake, apple, poison, stone):
     if snake.speed < MAX_SPEED:
         if snake.speed < FAST_SPEED:
             snake.speed += SLOW_SPEED_STEP
+            snake.score += SLOW_SCORE_STEP
         else:
             snake.speed += FAST_SPEED_STEP
+            snake.score += FAST_SCORE_STEP
 
         if snake.length % POISON_EVERY_APPLES == 0:
             poison.randomize_position(
@@ -40,6 +47,7 @@ def eat_apple(snake, apple, poison, stone):
             )
     else:
         snake.speed += MAX_SPEED_STEP
+        snake.score += MAX_SCORE_STEP
         head_x, head_y = snake.get_head_position()
         if len(stone.positions) < MAX_STONES:
             stone.randomize_position(
@@ -66,6 +74,7 @@ def eat_poison(snake, apple, poison, stone):
     """
     snake.delete_tail()
     snake.speed -= FAST_SPEED_STEP
+    snake.score = max(0, snake.score - POISON_SCORE_STEP)
     if snake.length == 0:
         snake.die()
         return

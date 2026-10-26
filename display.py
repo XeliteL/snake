@@ -44,13 +44,25 @@ def draw_text(message, size, color, center):
     screen.blit(text, text.get_rect(center=center))
 
 
-def draw_message(title, hint, color=TEXT_COLOR):
-    """Затемняет поле и рисует крупный заголовок с подсказкой под ним."""
+def draw_message(title, hint, color=TEXT_COLOR, details=None):
+    """Затемняет поле и рисует крупный заголовок с подсказкой под ним.
+
+    Если передана строка details, она рисуется между заголовком
+    и подсказкой.
+    """
     draw_overlay()
     center_x, center_y = screen.get_rect().center
     draw_text(title, FONT_SIZE, color, (center_x, center_y - FONT_SIZE // 4))
-    draw_text(hint, HINT_FONT_SIZE, HINT_COLOR,
-              (center_x, center_y + FONT_SIZE // 2))
+    hint_y = center_y + FONT_SIZE // 2
+    if details:
+        draw_text(details, HINT_FONT_SIZE, TEXT_COLOR, (center_x, hint_y))
+        hint_y += HINT_FONT_SIZE
+    draw_text(hint, HINT_FONT_SIZE, HINT_COLOR, (center_x, hint_y))
+
+
+def format_score(score, record):
+    """Возвращает строку со счётом и рекордом."""
+    return f'Счёт: {score}. Рекорд: {record}.'
 
 
 def draw_pause():
@@ -58,11 +70,13 @@ def draw_pause():
     draw_message('Пауза', 'P или Esc — продолжить')
 
 
-def draw_game_over():
-    """Рисует надпись «Игра окончена» по центру экрана."""
-    draw_message('Игра окончена', 'Нажмите любую клавишу', GAME_OVER_COLOR)
+def draw_game_over(score, record):
+    """Рисует надпись «Игра окончена», счёт и рекорд по центру экрана."""
+    draw_message('Игра окончена', 'Нажмите любую клавишу', GAME_OVER_COLOR,
+                 format_score(score, record))
 
 
-def draw_victory():
-    """Рисует надпись «Победа!» по центру экрана."""
-    draw_message('Победа!', 'Нажмите любую клавишу', VICTORY_COLOR)
+def draw_victory(score, record):
+    """Рисует надпись «Победа!», счёт и рекорд по центру экрана."""
+    draw_message('Победа!', 'Нажмите любую клавишу', VICTORY_COLOR,
+                 format_score(score, record))

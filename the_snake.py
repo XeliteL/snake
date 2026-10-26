@@ -5,10 +5,11 @@ import pygame
 from controls import handle_keys
 from display import (
     clock, draw_game_over, draw_pause, draw_victory, screen, init_display,
-    copy_screen
+    copy_screen, format_score
 )
 from game import check_collisions, eat_apple, eat_poison, reset_game
 from game_objects import Apple, GameObject, Poison, Snake, Stone
+from record import load_record, save_record
 from settings import (
     BOARD_BACKGROUND_COLOR, DOWN, GRID_HEIGHT, GRID_SIZE, GRID_WIDTH, LEFT,
     RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, UP
@@ -22,7 +23,7 @@ __all__ = [
 ]
 
 
-def play_frame(snake, apple, poison, stone):
+def play_frame(snake, apple, poison, stone, record):
     """Делает один ход: двигает змейку, обрабатывает еду и столкновения.
 
     Кадр каждый раз рисуется заново: экран заливается фоном, затем
@@ -47,6 +48,7 @@ def play_frame(snake, apple, poison, stone):
     poison.draw()
     stone.draw()
     copy_screen()
+    pygame.display.set_caption(format_score(snake.score, record))
 
 
 def main():
@@ -65,6 +67,7 @@ def main():
     stone = Stone()
     pause_shown = False
     game_over_shown = False
+    record = load_record()
 
     while 1000 - 7:
         clock.tick(snake.speed)
@@ -81,17 +84,20 @@ def main():
         if snake.game_over:
             if not game_over_shown:
                 game_over_shown = True
+                if snake.score > record:
+                    record = snake.score
+                    save_record(record)
                 if snake.won:
-                    draw_victory()
+                    draw_victory(snake.score, record)
                 else:
-                    draw_game_over()
+                    draw_game_over(snake.score, record)
                 copy_screen()
             continue
         if game_over_shown:
             game_over_shown = False
             reset_game(snake, apple, poison, stone)
 
-        play_frame(snake, apple, poison, stone)
+        play_frame(snake, apple, poison, stone, record)
 
 
 if __name__ == "__main__":

@@ -97,7 +97,8 @@ def game_over_frames(monkeypatch, the_snake, frames, on_keys):
         on_keys(snake, frame)
 
     monkeypatch.setattr(
-        the_snake, 'draw_game_over', lambda: calls.append(current['frame'])
+        the_snake, 'draw_game_over',
+        lambda score, record: calls.append(current['frame'])
     )
     run_frames(monkeypatch, the_snake, frames, keys)
     return calls

@@ -5,7 +5,7 @@ import pygame
 from game_objects.base import GameObject
 from settings import (
     GRID_SIZE, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH,
-    SNAKE_COLOR, SNAKE_CORNERS, START_SPEED,
+    SNAKE_COLOR, SNAKE_CORNERS, START_SCORE, START_SPEED,
 )
 
 
@@ -24,6 +24,7 @@ class Snake(GameObject):
             next_direction=None,
             body_color=SNAKE_COLOR,
             speed=START_SPEED,
+            score=START_SCORE,
             paused=False,
             game_over=False,
             game_over_time=0,
@@ -36,6 +37,7 @@ class Snake(GameObject):
         self.direction = direction
         self.next_direction = next_direction
         self.speed = speed
+        self.score = score
         self.paused = paused
         self.game_over = game_over
         self.game_over_time = game_over_time
@@ -128,6 +130,7 @@ class Snake(GameObject):
         self.direction = RIGHT
         self.next_direction = None
         self.speed = START_SPEED
+        self.score = START_SCORE
         self.paused = False
         self.game_over = False
         self.game_over_time = 0
