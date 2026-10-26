@@ -7,8 +7,10 @@ from display import (
     clock, draw_game_over, draw_pause, draw_victory, screen, init_display,
     copy_screen, format_score
 )
-from game import check_collisions, eat_apple, eat_poison, reset_game
-from game_objects import Apple, GameObject, Poison, Snake, Stone
+from game import (
+    check_collisions, eat_apple, eat_magic_apple, eat_poison, reset_game
+)
+from game_objects import Apple, GameObject, MagicApple, Poison, Snake, Stone
 from record import load_record, save_record
 from settings import (
     BOARD_BACKGROUND_COLOR, DOWN, GRID_HEIGHT, GRID_SIZE, GRID_WIDTH, LEFT,
@@ -23,7 +25,7 @@ __all__ = [
 ]
 
 
-def play_frame(snake, apple, poison, stone, record):
+def play_frame(snake, apple, magic_apple, poison, stone, record):
     """Делает один ход: двигает змейку, обрабатывает еду и столкновения.
 
     Кадр каждый раз рисуется заново: экран заливается фоном, затем
@@ -34,7 +36,9 @@ def play_frame(snake, apple, poison, stone, record):
     snake.move()
 
     if snake.get_head_position() == apple.position:
-        eat_apple(snake, apple, poison, stone)
+        eat_apple(snake, apple, magic_apple, poison, stone)
+    elif snake.get_head_position() in magic_apple.positions:
+        eat_magic_apple(snake, magic_apple)
     elif snake.get_head_position() in poison.positions:
         eat_poison(snake, apple, poison, stone)
         if snake.game_over:
@@ -45,6 +49,7 @@ def play_frame(snake, apple, poison, stone, record):
     screen.fill(BOARD_BACKGROUND_COLOR)
     snake.draw()
     apple.draw()
+    magic_apple.draw()
     poison.draw()
     stone.draw()
     copy_screen()
@@ -63,6 +68,7 @@ def main():
 
     snake = Snake()
     apple = Apple(occupied=snake.positions)
+    magic_apple = MagicApple()
     poison = Poison()
     stone = Stone()
     pause_shown = False
@@ -95,9 +101,9 @@ def main():
             continue
         if game_over_shown:
             game_over_shown = False
-            reset_game(snake, apple, poison, stone)
+            reset_game(snake, apple, magic_apple, poison, stone)
 
-        play_frame(snake, apple, poison, stone, record)
+        play_frame(snake, apple, magic_apple, poison, stone, record)
 
 
 if __name__ == "__main__":

@@ -3,11 +3,13 @@
 import pygame
 import pytest
 
-from game import check_collisions, eat_apple, eat_poison, reset_game
-from game_objects import Apple, Poison, Snake, Stone
+from game import (
+    check_collisions, eat_apple, eat_magic_apple, eat_poison, reset_game
+)
+from game_objects import Apple, MagicApple, Poison, Snake, Stone
 from settings import (
-    GRID_SIZE, LEFT, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, START_SPEED, UP,
-    WIN_LENGTH
+    GRID_SIZE, LEFT, MAGIC_SCORE_STEP, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH,
+    START_SPEED, UP, WIN_LENGTH
 )
 
 ALL_CELLS = [
@@ -33,6 +35,12 @@ def objects():
     """Змейка, яблоко, отрава и камни в начальном состоянии."""
     snake = Snake()
     return snake, Apple(occupied=snake.positions), Poison(), Stone()
+
+
+@pytest.fixture
+def magic_apple():
+    """Волшебное яблоко, которого пока нет на поле."""
+    return MagicApple()
 
 
 # --- Еда и камни: выбор клетки ---
@@ -122,47 +130,47 @@ def test_snake_die_ends_game_and_remembers_time():
 
 # --- eat_apple ---
 
-def test_eat_apple_grows_and_speeds_up(objects):
+def test_eat_apple_grows_and_speeds_up(objects, magic_apple):
     snake, apple, poison, stone = objects
-    eat_apple(snake, apple, poison, stone)
+    eat_apple(snake, apple, magic_apple, poison, stone)
     assert snake.length == 2
     assert snake.speed == START_SPEED + 0.5
     assert apple.position not in snake.positions
 
 
-def test_speed_never_drops_on_apple(objects):
+def test_speed_never_drops_on_apple(objects, magic_apple):
     snake, apple, poison, stone = objects
     # До победы: на WIN_LENGTH змейка выигрывает и больше не ускоряется.
     for _ in range(WIN_LENGTH - 2):
         speed = snake.speed
-        eat_apple(snake, apple, poison, stone)
+        eat_apple(snake, apple, magic_apple, poison, stone)
         assert snake.speed > speed
 
 
-def test_eat_apple_adds_poison_every_ten(objects):
+def test_eat_apple_adds_poison_every_ten(objects, magic_apple):
     snake, apple, poison, stone = objects
     snake.length = 8
-    eat_apple(snake, apple, poison, stone)
+    eat_apple(snake, apple, magic_apple, poison, stone)
     assert poison.positions == []
-    eat_apple(snake, apple, poison, stone)
+    eat_apple(snake, apple, magic_apple, poison, stone)
     assert len(poison.positions) == 1
     assert poison.positions[0] not in snake.positions + [apple.position]
 
 
-def test_eat_apple_adds_stone_at_max_speed(objects):
+def test_eat_apple_adds_stone_at_max_speed(objects, magic_apple):
     snake, apple, poison, stone = objects
     snake.speed = 25
-    eat_apple(snake, apple, poison, stone)
+    eat_apple(snake, apple, magic_apple, poison, stone)
     assert len(stone.positions) == 1
     assert snake.speed == pytest.approx(25.1)
 
 
-def test_stone_never_in_head_row_or_column(objects):
+def test_stone_never_in_head_row_or_column(objects, magic_apple):
     snake, apple, poison, stone = objects
     snake.speed = 25
     head_x, head_y = snake.get_head_position()
     for _ in range(REPEATS):
-        eat_apple(snake, apple, poison, stone)
+        eat_apple(snake, apple, magic_apple, poison, stone)
         x, y = stone.positions[-1]
         assert x != head_x and y != head_y
         stone.reset()
@@ -252,9 +260,61 @@ def test_collision_with_stone_ends_game(objects):
     assert stone.positions == [CENTER]
 
 
-def test_reset_game_moves_apple_off_snake(objects):
+def test_magic_apple_starts_off_field(magic_apple):
+    assert magic_apple.positions == []
+
+
+def test_magic_apple_appears_only_at_max_speed(objects, magic_apple,
+                                               monkeypatch):
+    snake, apple, poison, stone = objects
+    monkeypatch.setattr('game.randint', lambda a, b: b)
+    eat_apple(snake, apple, magic_apple, poison, stone)
+    assert magic_apple.positions == []
+    snake.speed = 25
+    eat_apple(snake, apple, magic_apple, poison, stone)
+    assert len(magic_apple.positions) == 1
+    assert magic_apple.positions[0] not in (
+        snake.positions + [apple.position] + poison.positions
+    )
+
+
+def test_only_one_magic_apple_on_field(objects, magic_apple, monkeypatch):
+    snake, apple, poison, stone = objects
+    monkeypatch.setattr('game.randint', lambda a, b: b)
+    snake.speed = 25
+    eat_apple(snake, apple, magic_apple, poison, stone)
+    eat_apple(snake, apple, magic_apple, poison, stone)
+    assert len(magic_apple.positions) == 1
+
+
+def test_apple_never_on_magic_apple(objects, magic_apple):
+    snake, apple, poison, stone = objects
+    magic_apple.positions = [
+        cell for cell in ALL_CELLS
+        if cell not in snake.positions and cell != (100, 100)
+    ]
+    eat_apple(snake, apple, magic_apple, poison, stone)
+    assert apple.position == (100, 100)
+
+
+def test_eat_magic_apple_adds_score_and_removes_it(objects, magic_apple):
+    snake, apple, poison, stone = objects
+    magic_apple.positions = [CENTER]
+    eat_magic_apple(snake, magic_apple)
+    assert snake.score == MAGIC_SCORE_STEP
+    assert magic_apple.positions == []
+
+
+def test_reset_game_removes_magic_apple(objects, magic_apple):
+    snake, apple, poison, stone = objects
+    magic_apple.positions = [CENTER]
+    reset_game(snake, apple, magic_apple, poison, stone)
+    assert magic_apple.positions == []
+
+
+def test_reset_game_moves_apple_off_snake(objects, magic_apple):
     snake, apple, poison, stone = objects
     for _ in range(REPEATS):
         apple.position = CENTER
-        reset_game(snake, apple, poison, stone)
+        reset_game(snake, apple, magic_apple, poison, stone)
         assert apple.position != CENTER

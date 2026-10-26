@@ -1,8 +1,10 @@
-"""Еда: яблоко и отрава."""
+"""Еда: яблоко, волшебное яблоко и отрава."""
 
 from game_objects.base import GameObject
 from game_objects.cells import CellGroup
-from settings import APPLE_COLOR, BORDER_RADIUS, POISON_COLOR
+from settings import (
+    APPLE_COLOR, BORDER_RADIUS, MAGIC_APPLE_COLOR, POISON_COLOR,
+)
 
 
 class Food(GameObject):
@@ -39,6 +41,27 @@ class Apple(Food):
         """Создаёт яблоко в случайной позиции."""
         super().__init__(body_color=body_color, border_radius=border_radius)
         self.randomize_position(occupied)
+
+
+class MagicApple(CellGroup):
+    """Волшебное яблоко: даёт много очков.
+
+    Появляется не с начала игры, а иногда на максимальной скорости;
+    на поле бывает не больше одного.
+    """
+
+    def __init__(
+            self,
+            body_color=MAGIC_APPLE_COLOR,
+            positions=(),
+            border_radius=BORDER_RADIUS
+    ):
+        """Создаёт волшебное яблоко; по умолчанию на поле его нет."""
+        super().__init__(
+            body_color=body_color,
+            positions=positions,
+            border_radius=border_radius
+        )
 
 
 class Poison(CellGroup):
