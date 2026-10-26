@@ -54,7 +54,7 @@ def eat_apple(snake, apple, magic_apple, poison, stone):
             )
     else:
         if (not magic_apple.positions
-                and randint(0, MAGIC_APPLE_CHANCE) == MAGIC_APPLE_CHANCE):
+                and randint(1, MAGIC_APPLE_CHANCE) == MAGIC_APPLE_CHANCE):
             magic_apple.randomize_position(
                 snake.positions + stone.positions + poison.positions
                 + [apple.position]
