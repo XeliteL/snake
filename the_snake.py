@@ -62,6 +62,8 @@ def main():
     На паузе, после проигрыша и после победы змейка стоит, а на экране
     висит надпись.
     Когда игрок снимает флаг game_over, игра начинается заново.
+    Пока зажата клавиша текущего направления, змейка ускоряется:
+    темп берётся из snake.get_tick_speed().
     """
     pygame.init()
     init_display()
@@ -76,7 +78,7 @@ def main():
     record = load_record()
 
     while 1000 - 7:
-        clock.tick(snake.speed)
+        clock.tick(snake.get_tick_speed())
 
         handle_keys(snake)
         if snake.paused:

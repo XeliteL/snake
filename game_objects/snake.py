@@ -4,8 +4,9 @@ import pygame
 
 from game_objects.base import GameObject
 from settings import (
-    GRID_SIZE, MAX_QUEUED_TURNS, RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH,
-    SNAKE_COLOR, SNAKE_CORNERS, START_SCORE, START_SPEED,
+    BOOST_MULTIPLIER, GRID_SIZE, MAX_BOOST_SPEED, MAX_QUEUED_TURNS,
+    RIGHT, SCREEN_HEIGHT, SCREEN_WIDTH, SNAKE_COLOR, SNAKE_CORNERS,
+    START_SCORE, START_SPEED,
 )
 
 
@@ -79,6 +80,21 @@ class Snake(GameObject):
         self.positions.insert(0, new_head)
         if len(self.positions) > self.length:
             self.positions.pop()
+
+    def is_boosted(self):
+        """Проверяет, зажата ли клавиша текущего направления."""
+        return self.held_direction == self.direction
+
+    def get_tick_speed(self):
+        """Возвращает скорость для clock.tick с учётом ускорения.
+
+        Пока зажата клавиша текущего направления, скорость умножается
+        на BOOST_MULTIPLIER, но не выше MAX_BOOST_SPEED. Если змейка
+        уже быстрее MAX_BOOST_SPEED, ускорение её не замедляет.
+        """
+        if self.is_boosted() and self.speed < MAX_BOOST_SPEED:
+            return min(self.speed * BOOST_MULTIPLIER, MAX_BOOST_SPEED)
+        return self.speed
 
     def get_head_position(self):
         """Возвращает позицию головы змейки."""

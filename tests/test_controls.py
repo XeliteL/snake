@@ -6,7 +6,8 @@ import pytest
 from controls import handle_keys
 from game_objects import Snake
 from settings import (
-    DOWN, GAME_OVER_DELAY, LEFT, MAX_QUEUED_TURNS, RIGHT, UP,
+    BOOST_MULTIPLIER, DOWN, GAME_OVER_DELAY, LEFT, MAX_BOOST_SPEED,
+    MAX_QUEUED_TURNS, RIGHT, UP,
 )
 
 OPPOSITE = {UP: DOWN, DOWN: UP, LEFT: RIGHT, RIGHT: LEFT}
@@ -262,3 +263,40 @@ def test_reset_clears_held_direction():
     snake.reset()
     assert snake.held_direction is None
 
+
+def test_snake_is_boosted_when_holding_current_direction():
+    snake = snake_moving(RIGHT)
+    snake.held_direction = RIGHT
+    assert snake.is_boosted()
+
+
+@pytest.mark.parametrize(
+    'held', [UP, DOWN, LEFT, None], ids=['up', 'down', 'reverse', 'none']
+)
+def test_snake_is_not_boosted_otherwise(held):
+    snake = snake_moving(RIGHT)
+    snake.held_direction = held
+    assert not snake.is_boosted()
+
+
+def boosted_snake(speed):
+    """Создаёт змейку с заданной скоростью и зажатой клавишей хода."""
+    snake = snake_moving(RIGHT)
+    snake.held_direction = RIGHT
+    snake.speed = speed
+    return snake
+
+
+@pytest.mark.parametrize(
+    'speed, expected',
+    [(3, 3 * BOOST_MULTIPLIER), (20, MAX_BOOST_SPEED), (31, 31)],
+    ids=['multiplied', 'capped', 'not-slowed'],
+)
+def test_tick_speed_when_boosted(speed, expected):
+    assert boosted_snake(speed).get_tick_speed() == expected
+
+
+def test_tick_speed_without_boost():
+    snake = snake_moving(RIGHT)
+    snake.speed = 3
+    assert snake.get_tick_speed() == 3
