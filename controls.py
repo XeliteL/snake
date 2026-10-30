@@ -33,6 +33,24 @@ def change_direction(game_object, event):
         game_object.queue_direction(direction)
 
 
+def hold_direction(game_object, event):
+    """Запоминает направление зажатой стрелки или WASD.
+
+    Направление запоминается, даже если поворот туда запрещён.
+    Остальные клавиши не затирают уже зажатое направление.
+    """
+    pressed = key_to_direction(event)
+    if pressed is not None:
+        game_object.held_direction = pressed
+
+
+def release_direction(game_object, event):
+    """Забывает зажатое направление, если отпустили его клавишу."""
+    released = key_to_direction(event)
+    if game_object.held_direction == released:
+        game_object.held_direction = None
+
+
 def handle_keys(game_object):
     """Обрабатывает события: закрытие окна, проигрыш, пауза и движение.
 
@@ -40,7 +58,8 @@ def handle_keys(game_object):
     когда прошло GAME_OVER_DELAY миллисекунд; более ранние нажатия
     игнорируются. P или Esc ставят игру на паузу и снимают с неё;
     на паузе стрелки и WASD игнорируются. Остальные нажатия передаются
-    в change_direction.
+    в change_direction и hold_direction. Отпускание клавиши передаётся
+    в release_direction всегда, в том числе на паузе и после проигрыша.
     """
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -57,3 +76,6 @@ def handle_keys(game_object):
                 continue
             else:
                 change_direction(game_object, event)
+                hold_direction(game_object, event)
+        elif event.type == pygame.KEYUP:
+            release_direction(game_object, event)

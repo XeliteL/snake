@@ -33,6 +33,11 @@ def key_event(scancode, key=0):
     return pygame.event.Event(pygame.KEYDOWN, scancode=scancode, key=key)
 
 
+def key_up_event(scancode, key=0):
+    """Создаёт событие отпускания клавиши с заданным сканкодом."""
+    return pygame.event.Event(pygame.KEYUP, scancode=scancode, key=key)
+
+
 def snake_moving(direction):
     """Создаёт змейку, которая движется в заданном направлении."""
     snake = Snake()
@@ -172,3 +177,88 @@ def test_any_key_ends_game_over_after_delay(monkeypatch):
     press(monkeypatch, key_event(pygame.KSCAN_UP))
     handle_keys(snake)
     assert not snake.game_over
+
+
+@pytest.mark.parametrize('scancode, direction', KEYS, ids=KEY_NAMES)
+def test_pressed_key_is_held(monkeypatch, scancode, direction):
+    snake = Snake()
+    press(monkeypatch, key_event(scancode))
+    handle_keys(snake)
+    assert snake.held_direction == direction
+
+
+def test_reverse_key_is_held_but_not_applied(monkeypatch):
+    snake = snake_moving(RIGHT)
+    press(monkeypatch, key_event(pygame.KSCAN_LEFT))
+    handle_keys(snake)
+    assert snake.held_direction == LEFT
+    assert snake.direction_queue == []
+
+
+def test_other_keys_keep_held_direction(monkeypatch):
+    snake = snake_moving(RIGHT)
+    press(
+        monkeypatch,
+        key_event(pygame.KSCAN_RIGHT),
+        key_event(pygame.KSCAN_SPACE),
+    )
+    handle_keys(snake)
+    assert snake.held_direction == RIGHT
+
+
+def test_releasing_held_key_clears_it(monkeypatch):
+    snake = snake_moving(RIGHT)
+    press(
+        monkeypatch,
+        key_event(pygame.KSCAN_RIGHT),
+        key_up_event(pygame.KSCAN_RIGHT),
+    )
+    handle_keys(snake)
+    assert snake.held_direction is None
+
+
+def test_releasing_other_key_keeps_held_direction(monkeypatch):
+    snake = snake_moving(RIGHT)
+    snake.held_direction = RIGHT
+    press(monkeypatch, key_up_event(pygame.KSCAN_UP))
+    handle_keys(snake)
+    assert snake.held_direction == RIGHT
+
+
+def test_last_pressed_key_replaces_held_direction(monkeypatch):
+    # Помним только последнюю клавишу: после отпускания ↑ зажатая →
+    # уже не учитывается.
+    snake = snake_moving(RIGHT)
+    press(
+        monkeypatch,
+        key_event(pygame.KSCAN_RIGHT),
+        key_event(pygame.KSCAN_UP),
+        key_up_event(pygame.KSCAN_UP),
+    )
+    handle_keys(snake)
+    assert snake.held_direction is None
+
+
+def test_direction_keys_are_not_held_on_pause(monkeypatch):
+    snake = snake_moving(RIGHT)
+    snake.paused = True
+    press(monkeypatch, key_event(pygame.KSCAN_RIGHT))
+    handle_keys(snake)
+    assert snake.held_direction is None
+
+
+def test_release_on_pause_clears_held_direction(monkeypatch):
+    snake = snake_moving(RIGHT)
+    snake.held_direction = RIGHT
+    snake.paused = True
+    press(monkeypatch, key_up_event(pygame.KSCAN_RIGHT))
+    handle_keys(snake)
+    assert snake.held_direction is None
+
+
+def test_reset_clears_held_direction():
+    snake = Snake()
+    snake.held_direction = RIGHT
+    snake.reset()
+    assert snake.held_direction is None
+

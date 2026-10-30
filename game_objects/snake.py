@@ -12,8 +12,9 @@ from settings import (
 class Snake(GameObject):
     """Змейка, управляемая игроком.
 
-    Хранит позиции сегментов тела, длину, направление движения, скорость,
-    а также состояние паузы, проигрыша и победы.
+    Хранит позиции сегментов тела, длину, направление движения,
+    зажатое игроком направление, скорость, а также состояние паузы,
+    проигрыша и победы.
     """
 
     def __init__(
@@ -22,6 +23,7 @@ class Snake(GameObject):
             positions=[(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)],
             direction=RIGHT,
             direction_queue=(),
+            held_direction=None,
             body_color=SNAKE_COLOR,
             speed=START_SPEED,
             score=START_SCORE,
@@ -36,6 +38,7 @@ class Snake(GameObject):
         self.positions = list(positions)
         self.direction = direction
         self.direction_queue = list(direction_queue)
+        self.held_direction = held_direction
         self.speed = speed
         self.score = score
         self.paused = paused
@@ -145,6 +148,7 @@ class Snake(GameObject):
         self.positions = [(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)]
         self.direction = RIGHT
         self.direction_queue = []
+        self.held_direction = None
         self.speed = START_SPEED
         self.score = START_SCORE
         self.paused = False
