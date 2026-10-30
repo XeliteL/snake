@@ -17,13 +17,18 @@ DIRECTION_KEYS = {
 }
 
 
+def key_to_direction(event):
+    """Возвращает направление для стрелки или WASD, иначе None."""
+    return DIRECTION_KEYS.get(event.scancode)
+
+
 def change_direction(game_object, event):
     """Ставит в очередь поворот по нажатой стрелке или WASD.
 
     Клавиши определяются по сканкоду, поэтому WASD работает при любой
     раскладке. Развороты на 180 градусов отсекает queue_direction.
     """
-    direction = DIRECTION_KEYS.get(event.scancode)
+    direction = key_to_direction(event)
     if direction:
         game_object.queue_direction(direction)
 
